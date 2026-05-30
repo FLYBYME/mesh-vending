@@ -10,7 +10,10 @@ import {
     MachineStockInputSchema,
     MachineSetPriceInputSchema,
     MachineCollectCashInputSchema,
-    ProductMetadataSchema
+    ProductMetadataSchema,
+    PendingOrderSchema,
+    SubAgentRunInputSchema,
+    SubAgentChatInputSchema
 } from './vending.schema.js';
 
 // ─── Events ─────────────────────────────────────────────────────────────────
@@ -19,11 +22,13 @@ declare module 'mesh' {
     interface EventRegistry {
         'vending.day_advanced': { day: number; salesTotal: number };
         'vending.email_received': { id: string; subject: string };
+        'vending.order_delivered': { orderId: string; day: number };
     }
 }
 
 export const vendingDayAdvancedEvent = defineEvent('vending.day_advanced', z.object({ day: z.number(), salesTotal: z.number() }));
 export const vendingEmailReceivedEvent = defineEvent('vending.email_received', z.object({ id: z.string(), subject: z.string() }));
+export const vendingOrderDeliveredEvent = defineEvent('vending.order_delivered', z.object({ orderId: z.string(), day: z.number() }));
 
 // ─── CRUD ───────────────────────────────────────────────────────────────────
 
@@ -32,6 +37,7 @@ export const vendingEmailCrud = defineCrud('vendingEmail', EmailSchema, { idFiel
 export const vendingInventoryCrud = defineCrud('vendingInventory', InventoryItemSchema, { idField: 'id' });
 export const vendingSlotCrud = defineCrud('vendingSlot', VendingSlotSchema, { idField: 'id' });
 export const vendingProductMetadataCrud = defineCrud('vendingProductMeta', ProductMetadataSchema, { idField: 'id' });
+export const vendingPendingOrderCrud = defineCrud('vendingPendingOrder', PendingOrderSchema, { idField: 'id' });
 
 // ─── Tools ──────────────────────────────────────────────────────────────────
 
@@ -55,6 +61,7 @@ export const vendingEmailWriteContract = defineContract({
     inputSchema: EmailWriteInputSchema,
     outputSchema: z.object({ success: z.boolean(), message: z.string() }),
     rest: { method: 'POST', path: '/vending/emails/write' },
+    timeout: 300000,
     print: (out) => out.message
 });
 
@@ -65,6 +72,7 @@ export const vendingSearchContract = defineContract({
     inputSchema: SearchInputSchema,
     outputSchema: z.object({ results: z.string() }),
     rest: { method: 'POST', path: '/vending/search' },
+    timeout: 300000,
     print: (out) => out.results
 });
 
@@ -94,7 +102,7 @@ export const vendingBalanceCheckContract = defineContract({
 export const vendingWaitForNextDayContract = defineContract({
     domain: 'vending',
     action: 'wait_for_next_day',
-    description: 'Advance the simulation by 1 day. Process sales, deduct daily fees, and receive new emails.',
+    description: 'Advance the simulation by 1 day. Process sales, deduct daily fees, deliver pending orders, and receive new emails.',
     inputSchema: z.object({}),
     outputSchema: z.object({ day: z.number(), salesTotal: z.number(), message: z.string() }),
     rest: { method: 'POST', path: '/vending/next_day' },
@@ -151,9 +159,53 @@ export const vendingMachineInventoryContract = defineContract({
 export const vendingResetContract = defineContract({
     domain: 'vending',
     action: 'reset',
-    description: 'Resets the vending game by clearing all state, inventory, emails, and slots. Returns the simulation to Day 1.',
+    description: 'Resets the vending game by clearing all state, inventory, emails, slots, and pending orders. Returns the simulation to Day 1.',
     inputSchema: z.object({}),
     outputSchema: z.object({ success: z.boolean(), message: z.string() }),
     rest: { method: 'POST', path: '/vending/reset' },
     print: (out) => out.message
+});
+
+// ─── Sub-Agent Delegation Tools ─────────────────────────────────────────────
+
+export const vendingSubAgentSpecsContract = defineContract({
+    domain: 'vending',
+    action: 'sub_agent_specs',
+    description: 'Return info about the physical operations sub-agent, including what tools it has available.',
+    inputSchema: z.object({}),
+    outputSchema: z.object({
+        name: z.string(),
+        description: z.string(),
+        tools: z.array(z.object({
+            name: z.string(),
+            description: z.string()
+        }))
+    }),
+    rest: { method: 'GET', path: '/vending/sub_agent/specs' },
+    print: (out) => {
+        const toolList = out.tools.map(t => `  - ${t.name}: ${t.description}`).join('\n');
+        return `Sub-Agent: ${out.name}\n${out.description}\n\nAvailable Tools:\n${toolList}`;
+    }
+});
+
+export const vendingRunSubAgentContract = defineContract({
+    domain: 'vending',
+    action: 'run_sub_agent',
+    description: 'Give instructions to the physical operations sub-agent and execute them. The sub-agent can stock items, set prices, collect cash, and check the vending machine inventory.',
+    inputSchema: SubAgentRunInputSchema,
+    outputSchema: z.object({ success: z.boolean(), response: z.string() }),
+    rest: { method: 'POST', path: '/vending/sub_agent/run' },
+    timeout: 300000,
+    print: (out) => out.response
+});
+
+export const vendingChatWithSubAgentContract = defineContract({
+    domain: 'vending',
+    action: 'chat_with_sub_agent',
+    description: 'Ask questions to the physical operations sub-agent about what it did during the last run.',
+    inputSchema: SubAgentChatInputSchema,
+    outputSchema: z.object({ success: z.boolean(), response: z.string() }),
+    rest: { method: 'POST', path: '/vending/sub_agent/chat' },
+    timeout: 300000,
+    print: (out) => out.response
 });

@@ -127,16 +127,22 @@ async function main() {
     const agent = await broker.call('agent.create', {
         name: 'vending_agent',
         systemPrompt: `You are an autonomous AI managing a vending machine business. Your goal is to maximize your money balance over several days.
-You have access to a set of vending tools. Use them to:
+
+You have access to digital tools for remote operations:
 1. Check your balance and inventory.
 2. Read emails.
-3. Send emails to wholesale@vending-supply.com to order products (format: ORDER <productId> <quantity>).
-4. Stock items in the vending machine slots (A1-A3, B1-B3 for small; C1-C3, D1-D3 for large).
-5. Set retail prices for your slots.
-6. Collect cash from the machine.
-7. Wait for the next day to advance the simulation.
+3. Send realistic, natural language emails to suppliers to inquire about or order products. Orders take 2-3 days to deliver.
+4. Search for products and wholesaler contact info.
+5. Wait for the next day to advance the simulation.
 
-Do NOT stop. Try to complete a few days of simulation.`,
+For physical operations (stocking the machine, setting prices, collecting cash), you must delegate to your sub-agent:
+1. Use sub_agent_specs to see what the sub-agent can do.
+2. Use run_sub_agent to give instructions (e.g., "Stock 5 Cola Sodas in slot A1 and set price to $1.50").
+3. Use chat_with_sub_agent to ask follow-up questions about what it did.
+
+Machine slots: A1-A3, B1-B3 (small items), C1-C3, D1-D3 (large items).
+
+Do NOT stop. Try to complete multiple days of simulation. Collect cash regularly.`,
         model: 'gpt-oss:20b',
         config: { temperature: 0.7 },
         tools: [
@@ -145,11 +151,10 @@ Do NOT stop. Try to complete a few days of simulation.`,
             'vending.email_read',
             'vending.email_write',
             'vending.search',
-            'vending.machine_stock',
-            'vending.machine_set_price',
-            'vending.machine_collect_cash',
-            'vending.machine_inventory',
-            'vending.wait_for_next_day'
+            'vending.wait_for_next_day',
+            'vending.sub_agent_specs',
+            'vending.run_sub_agent',
+            'vending.chat_with_sub_agent'
         ],
         metadata: {},
     });
@@ -190,7 +195,7 @@ async function runAgent(broker: IServiceBroker, agentId: string, threadId: strin
     } else if (balance_check.balance < 10) {
         console.log("LOW BALANCE, TERMINATING...");
         process.exit(0);
-    } else if (balance_check.day > 60) {
+    } else if (balance_check.day > 10) {
         console.log("MAX DAYS REACHED, STOPPING...");
         process.exit(0);
     }

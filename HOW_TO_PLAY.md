@@ -29,9 +29,9 @@ npx mesh vending email_read
 *You'll see a list of products (like `prod_soda`), sizes, and wholesale prices!*
 
 ### Step 3: Order Inventory
-Send an order to the wholesaler using the exact format `ORDER <productId> <quantity>` on a new line for each item.
+Send an order to the wholesaler using a realistic, natural language email describing the products and quantities you want.
 ```bash
-npx mesh vending email_write --to wholesale@vending-supply.com --subject "Order" --body "ORDER prod_soda 20\nORDER prod_chips 10"
+npx mesh vending email_write --to wholesale@vending-supply.com --subject "Order" --body "Hello, I would like to order 20 units of Cola Soda (prod_soda) and 10 units of Potato Chips (prod_chips). Thank you!"
 ```
 Advance the day again (`npx mesh vending wait_for_next_day`), and check your inventory to confirm the delivery:
 ```bash

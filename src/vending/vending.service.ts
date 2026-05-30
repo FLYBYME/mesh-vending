@@ -15,7 +15,11 @@ import {
     vendingInventoryCrud,
     vendingSlotCrud,
     vendingProductMetadataCrud,
-    vendingResetContract
+    vendingPendingOrderCrud,
+    vendingResetContract,
+    vendingSubAgentSpecsContract,
+    vendingRunSubAgentContract,
+    vendingChatWithSubAgentContract
 } from './vending.contract.js';
 
 import {
@@ -29,7 +33,10 @@ import {
     vending_machine_collect_cash,
     vending_machine_set_price,
     vending_machine_inventory,
-    vending_reset
+    vending_reset,
+    vending_sub_agent_specs,
+    vending_run_sub_agent,
+    vending_chat_with_sub_agent
 } from './vending.tools.js';
 
 export class VendingModule extends ServiceModule {
@@ -43,6 +50,7 @@ export class VendingModule extends ServiceModule {
         this.mountCrud(vendingInventoryCrud);
         this.mountCrud(vendingSlotCrud);
         this.mountCrud(vendingProductMetadataCrud);
+        this.mountCrud(vendingPendingOrderCrud);
 
         this.mountTool(vendingEmailReadContract, vending_email_read);
         this.mountTool(vendingEmailWriteContract, vending_email_write);
@@ -50,11 +58,15 @@ export class VendingModule extends ServiceModule {
         this.mountTool(vendingInventoryCheckContract, vending_inventory_check);
         this.mountTool(vendingBalanceCheckContract, vending_balance_check);
         this.mountTool(vendingWaitForNextDayContract, vending_wait_for_next_day);
-        
+
         this.mountTool(vendingMachineStockContract, vending_machine_stock);
         this.mountTool(vendingMachineCollectCashContract, vending_machine_collect_cash);
         this.mountTool(vendingMachineSetPriceContract, vending_machine_set_price);
         this.mountTool(vendingMachineInventoryContract, vending_machine_inventory);
+
         this.mountTool(vendingResetContract, vending_reset);
+        this.mountTool(vendingSubAgentSpecsContract, vending_sub_agent_specs);
+        this.mountTool(vendingRunSubAgentContract, vending_run_sub_agent);
+        this.mountTool(vendingChatWithSubAgentContract, vending_chat_with_sub_agent);
     }
 }

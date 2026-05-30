@@ -9,6 +9,7 @@ declare module 'mesh' {
         'demo.hello.sent': z.infer<typeof Contract_0.demoHelloSentEvent['schema']>;
         'vending.day_advanced': z.infer<typeof Contract_1.vendingDayAdvancedEvent['schema']>;
         'vending.email_received': z.infer<typeof Contract_1.vendingEmailReceivedEvent['schema']>;
+        'vending.order_delivered': z.infer<typeof Contract_1.vendingOrderDeliveredEvent['schema']>;
     }
 }
 

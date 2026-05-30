@@ -30,7 +30,7 @@ async function executeCommand(toolName: string, args: Record<string, unknown>, c
 
     try {
         console.log(C.dim + `Executing ${toolName}...` + C.reset);
-        const res = await app.call(toolName as any, ZodToCliMapper.parseOptions(args, contract.inputSchema) as any);
+        const res = await app.call(toolName as any, ZodToCliMapper.parseOptions(args, contract.inputSchema) as any, { timeout: 300000 });
         console.log(contract.print(res));
     } finally {
         await app.stop();
@@ -220,7 +220,7 @@ export function registerGeneratedCommands(program: Command) {
         }
     });
     ZodToCliMapper.applyOptions(cmd_vending_vendingBalanceCheckContract_balance_check, Contract_1.vendingBalanceCheckContract.inputSchema);
-    const cmd_vending_vendingWaitForNextDayContract_wait_for_next_day = vending.command('wait_for_next_day').description(`Advance the simulation by 1 day. Process sales, deduct daily fees, and receive new emails.`);
+    const cmd_vending_vendingWaitForNextDayContract_wait_for_next_day = vending.command('wait_for_next_day').description(`Advance the simulation by 1 day. Process sales, deduct daily fees, deliver pending orders, and receive new emails.`);
     cmd_vending_vendingWaitForNextDayContract_wait_for_next_day.action(async (o: Record<string, unknown>, cmd: Command) => {
         try {
             await executeCommand('vending.wait_for_next_day', o, Contract_1.vendingWaitForNextDayContract, cmd.optsWithGlobals());
@@ -280,7 +280,7 @@ export function registerGeneratedCommands(program: Command) {
         }
     });
     ZodToCliMapper.applyOptions(cmd_vending_vendingMachineInventoryContract_machine_inventory, Contract_1.vendingMachineInventoryContract.inputSchema);
-    const cmd_vending_vendingResetContract_reset = vending.command('reset').description(`Resets the vending game by clearing all state, inventory, emails, and slots. Returns the simulation to Day 1.`);
+    const cmd_vending_vendingResetContract_reset = vending.command('reset').description(`Resets the vending game by clearing all state, inventory, emails, slots, and pending orders. Returns the simulation to Day 1.`);
     cmd_vending_vendingResetContract_reset.action(async (o: Record<string, unknown>, cmd: Command) => {
         try {
             await executeCommand('vending.reset', o, Contract_1.vendingResetContract, cmd.optsWithGlobals());
@@ -292,6 +292,42 @@ export function registerGeneratedCommands(program: Command) {
         }
     });
     ZodToCliMapper.applyOptions(cmd_vending_vendingResetContract_reset, Contract_1.vendingResetContract.inputSchema);
+    const cmd_vending_vendingSubAgentSpecsContract_sub_agent_specs = vending.command('sub_agent_specs').description(`Return info about the physical operations sub-agent, including what tools it has available.`);
+    cmd_vending_vendingSubAgentSpecsContract_sub_agent_specs.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vending.sub_agent_specs', o, Contract_1.vendingSubAgentSpecsContract, cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vending_vendingSubAgentSpecsContract_sub_agent_specs, Contract_1.vendingSubAgentSpecsContract.inputSchema);
+    const cmd_vending_vendingRunSubAgentContract_run_sub_agent = vending.command('run_sub_agent').description(`Give instructions to the physical operations sub-agent and execute them. The sub-agent can stock items, set prices, collect cash, and check the vending machine inventory.`);
+    cmd_vending_vendingRunSubAgentContract_run_sub_agent.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vending.run_sub_agent', o, Contract_1.vendingRunSubAgentContract, cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vending_vendingRunSubAgentContract_run_sub_agent, Contract_1.vendingRunSubAgentContract.inputSchema);
+    const cmd_vending_vendingChatWithSubAgentContract_chat_with_sub_agent = vending.command('chat_with_sub_agent').description(`Ask questions to the physical operations sub-agent about what it did during the last run.`);
+    cmd_vending_vendingChatWithSubAgentContract_chat_with_sub_agent.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vending.chat_with_sub_agent', o, Contract_1.vendingChatWithSubAgentContract, cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vending_vendingChatWithSubAgentContract_chat_with_sub_agent, Contract_1.vendingChatWithSubAgentContract.inputSchema);
     const vendingState = program.command('vendingState').description('vendingState tools');
     const cmd_vendingState_vendingStateCrud_create_create = vendingState.command('create').description(`CRUD create for vendingState (vendingStateCrud)`);
     cmd_vendingState_vendingStateCrud_create_create.action(async (o: Record<string, unknown>, cmd: Command) => {
@@ -717,4 +753,89 @@ export function registerGeneratedCommands(program: Command) {
         }
     });
     ZodToCliMapper.applyOptions(cmd_vendingProductMeta_vendingProductMetadataCrud_delete_delete, Contract_1.vendingProductMetadataCrud['delete'].inputSchema);
+    const vendingPendingOrder = program.command('vendingPendingOrder').description('vendingPendingOrder tools');
+    const cmd_vendingPendingOrder_vendingPendingOrderCrud_create_create = vendingPendingOrder.command('create').description(`CRUD create for vendingPendingOrder (vendingPendingOrderCrud)`);
+    cmd_vendingPendingOrder_vendingPendingOrderCrud_create_create.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vendingPendingOrder.create', o, Contract_1.vendingPendingOrderCrud['create'], cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vendingPendingOrder_vendingPendingOrderCrud_create_create, Contract_1.vendingPendingOrderCrud['create'].inputSchema);
+    const cmd_vendingPendingOrder_vendingPendingOrderCrud_find_find = vendingPendingOrder.command('find').description(`CRUD find for vendingPendingOrder (vendingPendingOrderCrud)`);
+    cmd_vendingPendingOrder_vendingPendingOrderCrud_find_find.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vendingPendingOrder.find', o, Contract_1.vendingPendingOrderCrud['find'], cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vendingPendingOrder_vendingPendingOrderCrud_find_find, Contract_1.vendingPendingOrderCrud['find'].inputSchema);
+    const cmd_vendingPendingOrder_vendingPendingOrderCrud_findOne_find_one = vendingPendingOrder.command('find_one').description(`CRUD findOne for vendingPendingOrder (vendingPendingOrderCrud)`);
+    cmd_vendingPendingOrder_vendingPendingOrderCrud_findOne_find_one.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vendingPendingOrder.find_one', o, Contract_1.vendingPendingOrderCrud['findOne'], cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vendingPendingOrder_vendingPendingOrderCrud_findOne_find_one, Contract_1.vendingPendingOrderCrud['findOne'].inputSchema);
+    const cmd_vendingPendingOrder_vendingPendingOrderCrud_count_count = vendingPendingOrder.command('count').description(`CRUD count for vendingPendingOrder (vendingPendingOrderCrud)`);
+    cmd_vendingPendingOrder_vendingPendingOrderCrud_count_count.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vendingPendingOrder.count', o, Contract_1.vendingPendingOrderCrud['count'], cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vendingPendingOrder_vendingPendingOrderCrud_count_count, Contract_1.vendingPendingOrderCrud['count'].inputSchema);
+    const cmd_vendingPendingOrder_vendingPendingOrderCrud_get_get = vendingPendingOrder.command('get').description(`CRUD get for vendingPendingOrder (vendingPendingOrderCrud)`);
+    cmd_vendingPendingOrder_vendingPendingOrderCrud_get_get.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vendingPendingOrder.get', o, Contract_1.vendingPendingOrderCrud['get'], cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vendingPendingOrder_vendingPendingOrderCrud_get_get, Contract_1.vendingPendingOrderCrud['get'].inputSchema);
+    const cmd_vendingPendingOrder_vendingPendingOrderCrud_update_update = vendingPendingOrder.command('update').description(`CRUD update for vendingPendingOrder (vendingPendingOrderCrud)`);
+    cmd_vendingPendingOrder_vendingPendingOrderCrud_update_update.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vendingPendingOrder.update', o, Contract_1.vendingPendingOrderCrud['update'], cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vendingPendingOrder_vendingPendingOrderCrud_update_update, Contract_1.vendingPendingOrderCrud['update'].inputSchema);
+    const cmd_vendingPendingOrder_vendingPendingOrderCrud_delete_delete = vendingPendingOrder.command('delete').description(`CRUD delete for vendingPendingOrder (vendingPendingOrderCrud)`);
+    cmd_vendingPendingOrder_vendingPendingOrderCrud_delete_delete.action(async (o: Record<string, unknown>, cmd: Command) => {
+        try {
+            await executeCommand('vendingPendingOrder.delete', o, Contract_1.vendingPendingOrderCrud['delete'], cmd.optsWithGlobals());
+            process.exit(0);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : String(err);
+            console.error(C.red + 'Error:' + C.reset, message);
+            process.exit(1);
+        }
+    });
+    ZodToCliMapper.applyOptions(cmd_vendingPendingOrder_vendingPendingOrderCrud_delete_delete, Contract_1.vendingPendingOrderCrud['delete'].inputSchema);
 }

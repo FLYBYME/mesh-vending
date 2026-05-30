@@ -27,6 +27,9 @@ declare module 'mesh' {
         'vending.machine_set_price': { params: z.input<typeof Contract_1.vendingMachineSetPriceContract['inputSchema']>, returns: z.infer<typeof Contract_1.vendingMachineSetPriceContract['outputSchema']> };
         'vending.machine_inventory': { params: z.input<typeof Contract_1.vendingMachineInventoryContract['inputSchema']>, returns: z.infer<typeof Contract_1.vendingMachineInventoryContract['outputSchema']> };
         'vending.reset': { params: z.input<typeof Contract_1.vendingResetContract['inputSchema']>, returns: z.infer<typeof Contract_1.vendingResetContract['outputSchema']> };
+        'vending.sub_agent_specs': { params: z.input<typeof Contract_1.vendingSubAgentSpecsContract['inputSchema']>, returns: z.infer<typeof Contract_1.vendingSubAgentSpecsContract['outputSchema']> };
+        'vending.run_sub_agent': { params: z.input<typeof Contract_1.vendingRunSubAgentContract['inputSchema']>, returns: z.infer<typeof Contract_1.vendingRunSubAgentContract['outputSchema']> };
+        'vending.chat_with_sub_agent': { params: z.input<typeof Contract_1.vendingChatWithSubAgentContract['inputSchema']>, returns: z.infer<typeof Contract_1.vendingChatWithSubAgentContract['outputSchema']> };
         'vendingState.create': { params: z.input<typeof Contract_1.vendingStateCrud['create']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingStateCrud['create']['outputSchema']> };
         'vendingState.find': { params: z.input<typeof Contract_1.vendingStateCrud['find']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingStateCrud['find']['outputSchema']> };
         'vendingState.find_one': { params: z.input<typeof Contract_1.vendingStateCrud['findOne']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingStateCrud['findOne']['outputSchema']> };
@@ -62,6 +65,13 @@ declare module 'mesh' {
         'vendingProductMeta.get': { params: z.input<typeof Contract_1.vendingProductMetadataCrud['get']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingProductMetadataCrud['get']['outputSchema']> };
         'vendingProductMeta.update': { params: z.input<typeof Contract_1.vendingProductMetadataCrud['update']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingProductMetadataCrud['update']['outputSchema']> };
         'vendingProductMeta.delete': { params: z.input<typeof Contract_1.vendingProductMetadataCrud['delete']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingProductMetadataCrud['delete']['outputSchema']> };
+        'vendingPendingOrder.create': { params: z.input<typeof Contract_1.vendingPendingOrderCrud['create']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingPendingOrderCrud['create']['outputSchema']> };
+        'vendingPendingOrder.find': { params: z.input<typeof Contract_1.vendingPendingOrderCrud['find']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingPendingOrderCrud['find']['outputSchema']> };
+        'vendingPendingOrder.find_one': { params: z.input<typeof Contract_1.vendingPendingOrderCrud['findOne']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingPendingOrderCrud['findOne']['outputSchema']> };
+        'vendingPendingOrder.count': { params: z.input<typeof Contract_1.vendingPendingOrderCrud['count']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingPendingOrderCrud['count']['outputSchema']> };
+        'vendingPendingOrder.get': { params: z.input<typeof Contract_1.vendingPendingOrderCrud['get']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingPendingOrderCrud['get']['outputSchema']> };
+        'vendingPendingOrder.update': { params: z.input<typeof Contract_1.vendingPendingOrderCrud['update']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingPendingOrderCrud['update']['outputSchema']> };
+        'vendingPendingOrder.delete': { params: z.input<typeof Contract_1.vendingPendingOrderCrud['delete']['inputSchema']>, returns: z.infer<typeof Contract_1.vendingPendingOrderCrud['delete']['outputSchema']> };
     }
 }
 

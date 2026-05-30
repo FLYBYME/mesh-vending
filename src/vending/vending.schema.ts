@@ -3,7 +3,9 @@ import { z } from 'zod';
 export const VendingStateSchema = z.object({
     day: z.number().default(1),
     moneyBalance: z.number().default(500),
-    dailyFee: z.number().default(2)
+    dailyFee: z.number().default(2),
+    subAgentId: z.string().nullable().default(null),
+    subAgentThreadId: z.string().nullable().default(null)
 });
 export type VendingState = z.infer<typeof VendingStateSchema>;
 
@@ -47,6 +49,24 @@ export const EmailSchema = z.object({
 });
 export type Email = z.infer<typeof EmailSchema>;
 
+export const PendingOrderItemSchema = z.object({
+    productId: z.string(),
+    name: z.string(),
+    size: z.enum(['small', 'large']),
+    quantity: z.number(),
+    wholesalePrice: z.number()
+});
+
+export const PendingOrderSchema = z.object({
+    supplierEmail: z.string(),
+    items: z.array(PendingOrderItemSchema),
+    totalCost: z.number(),
+    orderedOnDay: z.number(),
+    estimatedDeliveryDay: z.number(),
+    delivered: z.boolean().default(false)
+});
+export type PendingOrder = z.infer<typeof PendingOrderSchema>;
+
 // Input schemas for tools
 
 export const EmailWriteInputSchema = z.object({
@@ -72,4 +92,12 @@ export const MachineSetPriceInputSchema = z.object({
 
 export const MachineCollectCashInputSchema = z.object({
     slotId: z.string().optional().describe("Slot ID to collect cash from. If omitted, collects from all slots.")
+});
+
+export const SubAgentRunInputSchema = z.object({
+    instructions: z.string().describe("Instructions to give to the sub-agent for physical operations (stocking, pricing, collecting cash, checking machine inventory)")
+});
+
+export const SubAgentChatInputSchema = z.object({
+    message: z.string().describe("Question or follow-up message to send to the sub-agent about its previous actions")
 });
