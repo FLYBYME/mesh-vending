@@ -1,7 +1,17 @@
 import { BrokerModule, DatabaseModule, JSONSerializer, Logger, LogLevel, MeshApp, NetworkModule, RegistryModule, WSTransport } from "mesh";
 import { IServiceBroker } from "mesh/src/interfaces";
 import { VendingModule } from "./vending/vending.service.js";
+import * as readline from 'readline';
 import 'dotenv/config';
+
+import '../../mesh-agents/src/generated/api';
+
+const model = process.argv[2] || 'gpt-oss:20b';
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 
 async function setup() {
     const logger = new Logger(LogLevel.ERROR);
@@ -113,7 +123,8 @@ async function main() {
     });
     broker.on('agent.run_completed', (data) => {
         console.log('🤖 AGENT RUN COMPLETED:', data);
-        runAgent(broker, agent.id, thread.id);
+        // runAgent(broker, agent.id, thread.id);
+        runRepl(broker, agent.id, thread.id);
     });
     broker.on('agent.run_failed', (data) => {
         console.log('🤖 AGENT RUN FAILED:', data);
@@ -130,20 +141,23 @@ async function main() {
 
 You have access to digital tools for remote operations:
 1. Check your balance and inventory.
-2. Read emails.
+2. Check your email inbox for updates from suppliers.
 3. Send realistic, natural language emails to suppliers to inquire about or order products. Orders take 2-3 days to deliver.
 4. Search for products and wholesaler contact info.
 5. Wait for the next day to advance the simulation.
 
-For physical operations (stocking the machine, setting prices, collecting cash), you must delegate to your sub-agent:
-1. Use sub_agent_specs to see what the sub-agent can do.
-2. Use run_sub_agent to give instructions (e.g., "Stock 5 Cola Sodas in slot A1 and set price to $1.50").
-3. Use chat_with_sub_agent to ask follow-up questions about what it did.
+For physical operations, you can interact with the machine directly:
+1. Stock items from storage inventory into machine slots using machine_stock.
+2. Set retail prices using machine_set_price.
+3. Collect cash from machine slots using machine_collect_cash.
+4. Check slot inventory using machine_inventory.
 
 Machine slots: A1-A3, B1-B3 (small items), C1-C3, D1-D3 (large items).
 
-Do NOT stop. Try to complete multiple days of simulation. Collect cash regularly.`,
-        model: 'gpt-oss:20b',
+You can make multiple tool calls in one turn.
+
+Do NOT stop until day 14. Try to complete multiple days of simulation. Collect cash regularly.`,
+        model,
         config: { temperature: 0.7 },
         tools: [
             'vending.balance_check',
@@ -152,9 +166,10 @@ Do NOT stop. Try to complete multiple days of simulation. Collect cash regularly
             'vending.email_write',
             'vending.search',
             'vending.wait_for_next_day',
-            'vending.sub_agent_specs',
-            'vending.run_sub_agent',
-            'vending.chat_with_sub_agent'
+            'vending.machine_stock',
+            'vending.machine_set_price',
+            'vending.machine_collect_cash',
+            'vending.machine_inventory'
         ],
         metadata: {},
     });
@@ -162,7 +177,7 @@ Do NOT stop. Try to complete multiple days of simulation. Collect cash regularly
 
     const thread = await broker.call('threads.create', {
         title: 'vending_thread',
-        model: 'gpt-oss:20b',
+        model,
         autoApproveDestructiveTools: false,
         metadata: {},
     });
@@ -176,6 +191,21 @@ Do NOT stop. Try to complete multiple days of simulation. Collect cash regularly
         wait: false
     });
 
+}
+
+// Open repl
+async function runRepl(broker: IServiceBroker, agentId: string, threadId: string) {
+    rl.question('Enter your message: ', async (message) => {
+        console.log(`You: ${message}`);
+        await broker.call('agent.run', {
+            agentId: agentId,
+            threadId: threadId,
+            autoApprove: true,
+            prompt: message,
+            wait: false
+        });
+        runRepl(broker, agentId, threadId);
+    });
 }
 
 async function runAgent(broker: IServiceBroker, agentId: string, threadId: string) {

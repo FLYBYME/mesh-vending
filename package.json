@@ -22,6 +22,7 @@
     "commander": "^14.0.3",
     "dotenv": "^17.4.2",
     "mesh": "file:../mesh",
+    "mesh-ui": "file:../mesh-ui",
     "mongodb": "^7.2.0",
     "ollama": "^0.6.3",
     "ssh2-sftp-client": "^9.1.0",

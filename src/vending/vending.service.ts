@@ -69,4 +69,8 @@ export class VendingModule extends ServiceModule {
         this.mountTool(vendingRunSubAgentContract, vending_run_sub_agent);
         this.mountTool(vendingChatWithSubAgentContract, vending_chat_with_sub_agent);
     }
+
+    async onStart(broker: any): Promise<void> {
+        // UI manifest registration disabled on boot.
+    }
 }

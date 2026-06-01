@@ -111,29 +111,25 @@ async function generateSupplierReply(
             query: { title: `supplier_${supplierAddress}` }
         });
 
-        if (thread) {
-            // Append a system message with the operator's latest balance
-            await ctx.call('messages.create', {
-                threadId: thread.id,
-                role: 'system',
-                content: `[System Notice: The operator's current money balance is now $${operatorBalance.toFixed(2)}.]`
-            });
-        } else {
+        if (!thread) {
+            // Appen{
             thread = await ctx.call('threads.create', {
                 title: `supplier_${supplierAddress}`,
-                model: 'gpt-oss:20b',
+                model: 'gemma4:e4b',
                 autoApproveDestructiveTools: false,
                 format: zodToJsonSchema(schema as any),
                 metadata: {}
             });
+        }
 
-            const catalogStr = JSON.stringify(PRODUCT_CATALOG, null, 2);
 
-            // System prompt for the supplier persona
-            await ctx.call('messages.create', {
-                threadId: thread.id,
-                role: 'system',
-                content: `You are a wholesale supplier (${supplierAddress}). Generate a realistic email reply to a vending machine operator.
+        const catalogStr = JSON.stringify(PRODUCT_CATALOG, null, 2);
+
+        // System prompt for the supplier persona
+        await ctx.call('messages.create', {
+            threadId: thread.id,
+            role: 'system',
+            content: `You are a wholesale supplier (${supplierAddress}). Generate a realistic email reply to a vending machine operator.
 
 Here is your product catalog:
 ${catalogStr}
@@ -146,9 +142,7 @@ If the operator is placing an order:
 - If their balance is sufficient, confirm the order, summarize what was ordered, and state that delivery takes 2-3 business days.
 - If their balance is insufficient, politely decline the order.
 - IMPORTANT: You MUST populate the 'orderedItems' JSON array with the correct IDs and quantities.`
-            });
-        }
-
+        });
         // User message with the agent's email
         await ctx.call('messages.create', {
             threadId: thread.id,
@@ -332,7 +326,7 @@ export async function vending_search(
         // Create temporary translation thread
         const translationThread = await ctx.call('threads.create', {
             title: `search_translation_${Date.now()}`,
-            model: 'gpt-oss:20b',
+            model: 'gemma4:e4b',
             autoApproveDestructiveTools: false,
             metadata: {}
         });
@@ -643,7 +637,7 @@ async function ensureSubAgent(ctx: IServiceContext): Promise<{ agentId: string; 
         systemPrompt: `You are a vending machine operator sub-agent. You have physical access to the vending machine.
 Your job is to follow instructions from the main agent to stock items, set prices, collect cash, and report on machine status.
 Use your tools to complete the requested tasks. Be concise in your responses and report what you did.`,
-        model: 'gpt-oss:20b',
+        model: 'gemma4:e4b',
         config: { temperature: 0.3 },
         tools: SUB_AGENT_TOOLS.map(t => t.name),
         metadata: {}
@@ -651,7 +645,7 @@ Use your tools to complete the requested tasks. Be concise in your responses and
 
     const thread = await ctx.call('threads.create', {
         title: 'vending_operator_thread',
-        model: 'gpt-oss:20b',
+        model: 'gemma4:e4b',
         autoApproveDestructiveTools: false,
         metadata: {}
     });

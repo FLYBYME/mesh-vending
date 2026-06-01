@@ -6,7 +6,7 @@ import { IServiceModule } from "mesh/src/interfaces";
 import path from "path";
 import 'dotenv/config'
 
-import '../../mesh-agents/src/generated/api';
+import '../../mesh-sandbox/src/generated/api';
 
 
 async function loadServicesFromDirectory(app: MeshApp, dir: string): Promise<void> {

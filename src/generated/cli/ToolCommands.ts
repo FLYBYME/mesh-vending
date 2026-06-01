@@ -25,7 +25,7 @@ async function executeCommand(toolName: string, args: Record<string, unknown>, c
     
     // Wait briefly for discovery if bootstrap is provided
     if (bootstrapStr) {
-        await new Promise(r => setTimeout(r, 1000)); // basic wait for registry sync
+        await new Promise(r => setTimeout(r, 2000)); // wait for registry sync (PEX)
     }
 
     try {
