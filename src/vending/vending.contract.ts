@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { defineCrud, defineContract, defineEvent } from 'mesh';
+import { defineCrud, defineContract, defineEvent } from '@flybyme/mesh';
 import {
     VendingStateSchema,
     EmailSchema,
@@ -18,7 +18,7 @@ import {
 
 // ─── Events ─────────────────────────────────────────────────────────────────
 
-declare module 'mesh' {
+declare module '@flybyme/mesh' {
     interface EventRegistry {
         'vending.day_advanced': { day: number; salesTotal: number };
         'vending.email_received': { id: string; subject: string };

@@ -1,4 +1,4 @@
-import { ServiceModule } from 'mesh';
+import { ServiceModule } from '@flybyme/mesh';
 import {
     vendingEmailReadContract,
     vendingEmailWriteContract,

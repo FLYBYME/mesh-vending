@@ -1,14 +1,12 @@
-import { Extension, ExtensionContext } from 'mesh-ui/core';
-import { BaseComponent } from 'mesh-ui/ui-lib';
+import { Extension, Shell } from '@flybyme/mesh-ui/core';
+import { BaseComponent } from '@flybyme/mesh-ui/ui-lib';
 
 class VendingDashboardView extends BaseComponent {
-    private shell: any;
-    private network: any;
+    private shell: Shell;
 
-    constructor(shell: any) {
+    constructor(shell: Shell) {
         super('div');
         this.shell = shell;
-        this.network = shell.getNetwork();
         this.addClasses('vending-dashboard');
         this.applyStyles({
             padding: '20px',
@@ -54,7 +52,7 @@ class VendingDashboardView extends BaseComponent {
             nextDayBtn.disabled = true;
             nextDayBtn.textContent = 'Advancing...';
             try {
-                await this.callTool('vending.wait_for_next_day', {});
+                await this.shell.app.call('vending.wait_for_next_day', {});
                 await this.refreshData();
             } catch (err) {
                 console.error(err);
@@ -64,10 +62,8 @@ class VendingDashboardView extends BaseComponent {
             }
         });
 
-        // Listen for network events
-        if (this.network) {
-            this.network.on('vending.day_advanced', () => this.refreshData());
-        }
+        // Listen for network events via the app
+        this.shell.app.on('vending.day_advanced', () => this.refreshData());
 
         await this.refreshData();
     }
@@ -75,9 +71,9 @@ class VendingDashboardView extends BaseComponent {
     private async refreshData() {
         try {
             const [balanceData, inventoryData, machineData] = await Promise.all([
-                this.callTool('vending.balance_check', {}),
-                this.callTool('vending.inventory_check', {}),
-                this.callTool('vending.machine_inventory', {})
+                this.shell.app.call<any>('vending.balance_check', {}),
+                this.shell.app.call<any[]>('vending.inventory_check', {}),
+                this.shell.app.call<any[]>('vending.machine_inventory', {})
             ]);
 
             const dayEl = this.element.querySelector('#vending-day');
@@ -126,31 +122,6 @@ class VendingDashboardView extends BaseComponent {
             console.error('Refresh error:', err);
         }
     }
-
-    private async callTool(action: string, input: any): Promise<any> {
-        if (!this.network) throw new Error('No network connection');
-        
-        await this.network.registry.waitForTool(action, 5000);
-        const targetNode = this.network.registry.selectNode(action);
-        if (!targetNode) throw new Error(`Tool ${action} not found`);
-
-        return new Promise((resolve, reject) => {
-            const reqId = `req_${Math.random().toString(36).substr(2, 9)}`;
-            const handler = (data: any, packet: any) => {
-                if (packet.id === reqId) {
-                    this.network.unsubscribe('*', handler);
-                    if (packet.type === 'RESPONSE') resolve(data);
-                    else if (packet.type === 'RESPONSE_ERROR') reject(new Error(packet.error?.message || 'Unknown error'));
-                }
-            };
-            this.network.onMessage('*', handler);
-            this.network.send(targetNode.nodeID, action, input, { type: 'REQUEST', id: reqId });
-            setTimeout(() => {
-                this.network.unsubscribe('*', handler);
-                reject(new Error(`Timeout calling ${action}`));
-            }, 5000);
-        });
-    }
 }
 
 export default class VendingExtension implements Extension {
@@ -159,20 +130,20 @@ export default class VendingExtension implements Extension {
     public readonly version = '1.0.0';
     public readonly menus = [];
 
-    async activate(context: ExtensionContext) {
+    async activate(shell: Shell) {
         console.log('Vending Extension Activated');
 
-        context.shell.views.registerProvider('left-panel', {
+        shell.views.registerProvider('left-panel', {
             id: 'vending.main',
             name: 'Vending Dashboard',
             resolveView: async (container: HTMLElement) => {
-                const view = new VendingDashboardView(context.shell);
+                const view = new VendingDashboardView(shell);
                 await view.render();
                 view.mount(container);
             }
         });
 
-        context.shell.activityBar.registerItem({
+        shell.activityBar.registerItem({
             id: 'vending.main',
             location: 'left-panel',
             icon: 'fas fa-store',

@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { DemoSchema } from './demo.schema.js';
-import { defineCrud, defaultPrint, defineContract, defineEvent } from 'mesh';
+import { defineCrud, defaultPrint, defineContract, defineEvent } from '@flybyme/mesh';
 
 // ─── Event Augmentation ──────────────────────────────────────────────────────
 // We augment the EventRegistry to register our domain-specific events.
 
-declare module 'mesh' {
+declare module '@flybyme/mesh' {
     interface EventRegistry {
         'demo.hello.sent': DemoHelloEvent;
     }

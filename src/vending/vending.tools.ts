@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { IServiceContext } from 'mesh';
+import { IServiceContext } from '@flybyme/mesh';
 import {
     vendingEmailReadContract,
     vendingEmailWriteContract,
@@ -22,7 +22,7 @@ import {
     vendingProductMetadataCrud,
     vendingPendingOrderCrud
 } from './vending.contract.js';
-import zodToJsonSchema from 'zod-to-json-schema';
+import { zodToJsonSchema } from 'zod-to-json-schema';
 
 // Product catalog with economics data
 const PRODUCT_CATALOG = [

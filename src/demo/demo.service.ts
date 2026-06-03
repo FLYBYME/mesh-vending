@@ -1,4 +1,4 @@
-import { ServiceModule } from 'mesh';
+import { ServiceModule } from '@flybyme/mesh';
 import { demoHelloContract, demoStatusContract, demoNotifyContract, demoCrud } from './demo.contract.js';
 import { demo_hello, demo_status, demo_notify } from './demo.tools.js';
 

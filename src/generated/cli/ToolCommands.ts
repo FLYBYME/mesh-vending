@@ -1,6 +1,7 @@
 // GENERATED FILE - DO NOT EDIT
 import { Command } from 'commander';
-import { MeshApp, ZodToCliMapper, C, RegistryModule, NetworkModule, BrokerModule, WSTransport, JSONSerializer, Logger } from 'mesh';
+import { MeshApp, C, RegistryModule, NetworkModule, BrokerModule, JSONSerializer, Logger } from '@flybyme/mesh';
+import { WSTransport, ZodToCliMapper } from '@flybyme/mesh/node';
 import * as Contract_0 from '../../demo/demo.contract.js';
 import * as Contract_1 from '../../vending/vending.contract.js';
 

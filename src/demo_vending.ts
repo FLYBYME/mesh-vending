@@ -1,10 +1,11 @@
-import { BrokerModule, DatabaseModule, JSONSerializer, Logger, LogLevel, MeshApp, NetworkModule, RegistryModule, WSTransport } from "mesh";
-import { IServiceBroker } from "mesh/src/interfaces";
+import { BrokerModule, DatabaseModule, JSONSerializer, Logger, LogLevel, MeshApp, NetworkModule, RegistryModule } from "@flybyme/mesh";
+import { WSTransport } from "@flybyme/mesh/node";
+import { IServiceBroker } from "@flybyme/mesh";
 import { VendingModule } from "./vending/vending.service.js";
 import * as readline from 'readline';
 import 'dotenv/config';
 
-import '../../mesh-agents/src/generated/api';
+import './generated/api.js';
 
 const model = process.argv[2] || 'gpt-oss:20b';
 

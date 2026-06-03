@@ -1,32 +1,23 @@
 {
-  "name": "mesh-agents",
-  "private": true,
-  "version": "0.0.0",
+  "name": "@flybyme/mesh-vending",
+  "version": "1.0.0",
   "type": "module",
+  "main": "./dist/vending/vending.service.js",
+  "types": "./dist/vending/vending.service.d.ts",
   "scripts": {
-    "dev": "vite",
-    "build": "npx mesh generate && tsc --noEmit --diagnostics",
-    "preview": "vite preview",
-    "dev:backend": "npx tsx src/services/index.ts",
-    "generate": "npx mesh generate --dir src/services",
-    "test": "vitest run"
-  },
-  "devDependencies": {
-    "typescript": "~6.0.2",
-    "vite": "^8.0.12",
-    "vitest": "^4.1.7",
-    "@types/ssh2-sftp-client": "^9.0.0",
-    "@types/ssh2": "^1.11.2"
+    "build": "tsc",
+    "generate": "mesh generate"
   },
   "dependencies": {
+    "@flybyme/mesh": "1.1.0",
+    "@flybyme/mesh-ui": "^1.0.0",
     "commander": "^14.0.3",
-    "dotenv": "^17.4.2",
-    "mesh": "file:../mesh",
-    "mesh-ui": "file:../mesh-ui",
-    "mongodb": "^7.2.0",
-    "ollama": "^0.6.3",
-    "ssh2-sftp-client": "^9.1.0",
+    "dotenv": "latest",
     "zod": "^3.23.8",
     "zod-to-json-schema": "^3.25.2"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "latest"
   }
 }

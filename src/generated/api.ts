@@ -1,10 +1,13 @@
 // GENERATED FILE - DO NOT EDIT
 import { z } from 'zod';
-import type { IServiceToolRegistry } from 'mesh';
+import type { IServiceToolRegistry } from '@flybyme/mesh';
+
+// External Type Includes
+import '../../../mesh-agents/src/generated/api.ts';
 import * as Contract_0 from '../demo/demo.contract.js';
 import * as Contract_1 from '../vending/vending.contract.js';
 
-declare module 'mesh' {
+declare module '@flybyme/mesh' {
     interface IServiceToolRegistry {
         'demo.hello': { params: z.input<typeof Contract_0.demoHelloContract['inputSchema']>, returns: z.infer<typeof Contract_0.demoHelloContract['outputSchema']> };
         'demo.status': { params: z.input<typeof Contract_0.demoStatusContract['inputSchema']>, returns: z.infer<typeof Contract_0.demoStatusContract['outputSchema']> };

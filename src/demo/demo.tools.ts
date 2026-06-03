@@ -4,7 +4,7 @@ import {
     demoStatusContract,
     demoNotifyContract
 } from './demo.contract.js';
-import type { IServiceContext } from 'mesh';
+import type { IServiceContext } from '@flybyme/mesh';
 
 export async function demo_hello(
     input: z.infer<typeof demoHelloContract.inputSchema>,
