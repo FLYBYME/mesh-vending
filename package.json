@@ -9,8 +9,9 @@
     "generate": "mesh generate"
   },
   "dependencies": {
-    "@flybyme/mesh": "1.1.0",
-    "@flybyme/mesh-ui": "^1.0.0",
+    "@flybyme/mesh": "^1.1.2",
+    "@flybyme/mesh-agents": "^1.0.2",
+    "@flybyme/mesh-ui": "^1.0.6",
     "commander": "^14.0.3",
     "dotenv": "latest",
     "zod": "^3.23.8",

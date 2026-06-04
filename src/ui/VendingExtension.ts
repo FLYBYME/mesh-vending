@@ -1,5 +1,6 @@
-import { Extension, Shell } from '@flybyme/mesh-ui/core';
-import { BaseComponent } from '@flybyme/mesh-ui/ui-lib';
+import { IServiceBroker } from '@flybyme/mesh';
+import { Extension, Shell } from '@flybyme/mesh-ui';
+import { BaseComponent } from '@flybyme/mesh-ui';
 
 class VendingDashboardView extends BaseComponent {
     private shell: Shell;
@@ -47,7 +48,7 @@ class VendingDashboardView extends BaseComponent {
         `;
 
         const nextDayBtn = this.element.querySelector('#next-day-btn') as HTMLButtonElement;
-        
+
         nextDayBtn.addEventListener('click', async () => {
             nextDayBtn.disabled = true;
             nextDayBtn.textContent = 'Advancing...';
@@ -62,8 +63,10 @@ class VendingDashboardView extends BaseComponent {
             }
         });
 
+        const broker = this.shell.app.getProvider<IServiceBroker>('broker');
+
         // Listen for network events via the app
-        this.shell.app.on('vending.day_advanced', () => this.refreshData());
+        broker.on('vending.day_advanced', () => this.refreshData());
 
         await this.refreshData();
     }
@@ -71,9 +74,9 @@ class VendingDashboardView extends BaseComponent {
     private async refreshData() {
         try {
             const [balanceData, inventoryData, machineData] = await Promise.all([
-                this.shell.app.call<any>('vending.balance_check', {}),
-                this.shell.app.call<any[]>('vending.inventory_check', {}),
-                this.shell.app.call<any[]>('vending.machine_inventory', {})
+                this.shell.app.call('vending.balance_check', {}),
+                this.shell.app.call('vending.inventory_check', {}),
+                this.shell.app.call('vending.machine_inventory', {})
             ]);
 
             const dayEl = this.element.querySelector('#vending-day');
@@ -99,10 +102,10 @@ class VendingDashboardView extends BaseComponent {
 
             if (machineEl) {
                 machineEl.innerHTML = machineData.map((slot: any) => {
-                    const status = slot.productId 
-                        ? `<span style="color: #4caf50;">${slot.productName}</span> (Qty: ${slot.quantity})` 
+                    const status = slot.productId
+                        ? `<span style="color: #4caf50;">${slot.productName}</span> (Qty: ${slot.quantity})`
                         : `<span style="color: var(--text-muted);">EMPTY</span>`;
-                    
+
                     return `
                         <div style="padding: 8px; border-bottom: 1px solid rgba(255,255,255,0.05);">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
