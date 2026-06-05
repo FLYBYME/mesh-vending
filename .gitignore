@@ -39,4 +39,4 @@ playwright-report/*
 test-results/*
 tmp/*
 
-.workspaces/*
+.workspaces/*.npmrc
