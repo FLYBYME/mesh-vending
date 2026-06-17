@@ -5,13 +5,13 @@
   "main": "./dist/vending/vending.service.js",
   "types": "./dist/vending/vending.service.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "npx mesh generate --include @flybyme/mesh-ui --include @flybyme/mesh-agents && tsc",
     "generate": "mesh generate"
   },
   "dependencies": {
-    "@flybyme/mesh": "^1.1.2",
-    "@flybyme/mesh-agents": "^1.0.2",
-    "@flybyme/mesh-ui": "^1.0.6",
+    "@flybyme/mesh": "github:FLYBYME/mesh",
+    "@flybyme/mesh-ui": "github:FLYBYME/mesh-ui",
+    "@flybyme/mesh-agents": "github:FLYBYME/mesh-agents",
     "commander": "^14.0.3",
     "dotenv": "latest",
     "zod": "^3.23.8",

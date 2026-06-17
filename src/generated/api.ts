@@ -2,6 +2,7 @@
 import { z } from 'zod';
 
 // External Type Includes
+import '@flybyme/mesh-ui';
 import '@flybyme/mesh-agents';
 import * as Contract_0 from '../vending/vending.contract.js';
 
@@ -18,9 +19,6 @@ declare global {
         'vending.machine_set_price': { params: z.input<typeof Contract_0.vendingMachineSetPriceContract['inputSchema']>, returns: z.infer<typeof Contract_0.vendingMachineSetPriceContract['outputSchema']> };
         'vending.machine_inventory': { params: z.input<typeof Contract_0.vendingMachineInventoryContract['inputSchema']>, returns: z.infer<typeof Contract_0.vendingMachineInventoryContract['outputSchema']> };
         'vending.reset': { params: z.input<typeof Contract_0.vendingResetContract['inputSchema']>, returns: z.infer<typeof Contract_0.vendingResetContract['outputSchema']> };
-        'vending.sub_agent_specs': { params: z.input<typeof Contract_0.vendingSubAgentSpecsContract['inputSchema']>, returns: z.infer<typeof Contract_0.vendingSubAgentSpecsContract['outputSchema']> };
-        'vending.run_sub_agent': { params: z.input<typeof Contract_0.vendingRunSubAgentContract['inputSchema']>, returns: z.infer<typeof Contract_0.vendingRunSubAgentContract['outputSchema']> };
-        'vending.chat_with_sub_agent': { params: z.input<typeof Contract_0.vendingChatWithSubAgentContract['inputSchema']>, returns: z.infer<typeof Contract_0.vendingChatWithSubAgentContract['outputSchema']> };
         'vendingState.create': { params: z.input<typeof Contract_0.vendingStateCrud['create']['inputSchema']>, returns: z.infer<typeof Contract_0.vendingStateCrud['create']['outputSchema']> };
         'vendingState.find': { params: z.input<typeof Contract_0.vendingStateCrud['find']['inputSchema']>, returns: z.infer<typeof Contract_0.vendingStateCrud['find']['outputSchema']> };
         'vendingState.find_one': { params: z.input<typeof Contract_0.vendingStateCrud['findOne']['inputSchema']>, returns: z.infer<typeof Contract_0.vendingStateCrud['findOne']['outputSchema']> };

@@ -2,6 +2,7 @@
 import { z } from 'zod';
 
 // External Type Includes
+import '@flybyme/mesh-ui';
 import '@flybyme/mesh-agents';
 import * as Contract_0 from '../vending/vending.contract.js';
 

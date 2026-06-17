@@ -12,17 +12,10 @@ import {
     vendingMachineSetPriceContract,
     vendingMachineInventoryContract,
     vendingResetContract,
-    vendingSubAgentSpecsContract,
-    vendingRunSubAgentContract,
-    vendingChatWithSubAgentContract,
-    vendingStateCrud,
-    vendingEmailCrud,
-    vendingInventoryCrud,
-    vendingSlotCrud,
-    vendingProductMetadataCrud,
-    vendingPendingOrderCrud
 } from './vending.contract.js';
 import { zodToJsonSchema } from 'zod-to-json-schema';
+
+const model = process.env.MODEL || 'gemma4:12b-it-q8_0';
 
 // Product catalog with economics data
 const PRODUCT_CATALOG = [
@@ -115,7 +108,7 @@ async function generateSupplierReply(
             // Appen{
             thread = await ctx.call('threads.create', {
                 title: `supplier_${supplierAddress}`,
-                model: 'gemma4:e4b',
+                model: model,
                 autoApproveDestructiveTools: false,
                 format: zodToJsonSchema(schema as any),
                 metadata: {}
@@ -326,7 +319,7 @@ export async function vending_search(
         // Create temporary translation thread
         const translationThread = await ctx.call('threads.create', {
             title: `search_translation_${Date.now()}`,
-            model: 'gemma4:e4b',
+            model: model,
             autoApproveDestructiveTools: false,
             metadata: {}
         });
@@ -602,105 +595,4 @@ export async function vending_reset(
         }
     }
     return { success: true, message: 'Vending game has been completely reset.' };
-}
-
-// ─── Sub-Agent Delegation Tools ─────────────────────────────────────────────
-
-const SUB_AGENT_TOOLS = [
-    { name: 'vending.machine_stock', description: 'Move items from storage inventory into a vending machine slot.' },
-    { name: 'vending.machine_set_price', description: 'Set the retail price for a slot.' },
-    { name: 'vending.machine_collect_cash', description: 'Collect earnings from the machine.' },
-    { name: 'vending.machine_inventory', description: 'Check the vending machine slot inventory.' },
-];
-
-export async function vending_sub_agent_specs(
-    input: z.infer<typeof vendingSubAgentSpecsContract.inputSchema>,
-    ctx: IServiceContext
-): Promise<z.infer<typeof vendingSubAgentSpecsContract.outputSchema>> {
-    return {
-        name: 'Vending Machine Operator',
-        description: 'A physical operations sub-agent that can interact with the vending machine hardware. It can stock products, set prices, collect cash, and check the machine inventory.',
-        tools: SUB_AGENT_TOOLS
-    };
-}
-
-async function ensureSubAgent(ctx: IServiceContext): Promise<{ agentId: string; threadId: string }> {
-    const state = await getState(ctx);
-
-    if (state.subAgentId && state.subAgentThreadId) {
-        return { agentId: state.subAgentId, threadId: state.subAgentThreadId };
-    }
-
-    // Create the sub-agent
-    const agent = await ctx.call('agent.create', {
-        name: 'vending_operator',
-        systemPrompt: `You are a vending machine operator sub-agent. You have physical access to the vending machine.
-Your job is to follow instructions from the main agent to stock items, set prices, collect cash, and report on machine status.
-Use your tools to complete the requested tasks. Be concise in your responses and report what you did.`,
-        model: 'gemma4:e4b',
-        config: { temperature: 0.3 },
-        tools: SUB_AGENT_TOOLS.map(t => t.name),
-        metadata: {}
-    });
-
-    const thread = await ctx.call('threads.create', {
-        title: 'vending_operator_thread',
-        model: 'gemma4:e4b',
-        autoApproveDestructiveTools: false,
-        metadata: {}
-    });
-
-    await ctx.call('vendingState.update', {
-        id: state.id,
-        subAgentId: agent.id,
-        subAgentThreadId: thread.id
-    });
-
-    return { agentId: agent.id, threadId: thread.id };
-}
-
-async function getLatestAssistantMessage(threadId: string, ctx: IServiceContext): Promise<string> {
-    const messages = await ctx.call('messages.find', { query: { threadId, role: 'assistant' } });
-    if (messages.length === 0) return 'Sub-agent completed the task but did not provide a response.';
-    return messages[messages.length - 1].content || 'Task completed.';
-}
-
-export async function vending_run_sub_agent(
-    input: z.infer<typeof vendingRunSubAgentContract.inputSchema>,
-    ctx: IServiceContext
-): Promise<z.infer<typeof vendingRunSubAgentContract.outputSchema>> {
-    try {
-        const { agentId, threadId } = await ensureSubAgent(ctx);
-        await ctx.call('agent.run', {
-            agentId,
-            threadId,
-            autoApprove: true,
-            prompt: input.instructions,
-            wait: true
-        }, { timeout: 5 * 60 * 1000 });
-        const response = await getLatestAssistantMessage(threadId, ctx);
-        return { success: true, response };
-    } catch (e: any) {
-        return { success: false, response: `Sub-agent execution failed: ${e.message}` };
-    }
-}
-
-export async function vending_chat_with_sub_agent(
-    input: z.infer<typeof vendingChatWithSubAgentContract.inputSchema>,
-    ctx: IServiceContext
-): Promise<z.infer<typeof vendingChatWithSubAgentContract.outputSchema>> {
-    try {
-        const { agentId, threadId } = await ensureSubAgent(ctx);
-        await ctx.call('agent.run', {
-            agentId,
-            threadId,
-            autoApprove: false,
-            prompt: input.message,
-            wait: true
-        }, { timeout: 5 * 60 * 1000 });
-        const response = await getLatestAssistantMessage(threadId, ctx);
-        return { success: true, response };
-    } catch (e: any) {
-        return { success: false, response: `Chat with sub-agent failed: ${e.message}` };
-    }
 }

@@ -136,9 +136,20 @@ async function main() {
         }, 5000);
     });
 
-    const agent = await broker.call('agent.create', {
-        name: 'vending_agent',
-        systemPrompt: `You are an autonomous AI managing a vending machine business. Your goal is to maximize your money balance over several days.
+    const tools = [
+        'vending.balance_check',
+        'vending.inventory_check',
+        'vending.email_read',
+        'vending.email_write',
+        'vending.search',
+        'vending.wait_for_next_day',
+        'vending.machine_stock',
+        'vending.machine_set_price',
+        'vending.machine_collect_cash',
+        'vending.machine_inventory'
+    ];
+
+    const system_prompt = `You are an autonomous AI managing a vending machine business. Your goal is to maximize your money balance over several days.
 
 You have access to digital tools for remote operations:
 1. Check your balance and inventory.
@@ -157,21 +168,14 @@ Machine slots: A1-A3, B1-B3 (small items), C1-C3, D1-D3 (large items).
 
 You can make multiple tool calls in one turn.
 
-Do NOT stop until day 14. Try to complete multiple days of simulation. Collect cash regularly.`,
+Do NOT stop until day 14. Try to complete multiple days of simulation. Collect cash regularly.`;
+
+    const agent = await broker.call('agent.create', {
+        name: 'vending_agent',
+        systemPrompt: system_prompt,
         model,
         config: { temperature: 0.7 },
-        tools: [
-            'vending.balance_check',
-            'vending.inventory_check',
-            'vending.email_read',
-            'vending.email_write',
-            'vending.search',
-            'vending.wait_for_next_day',
-            'vending.machine_stock',
-            'vending.machine_set_price',
-            'vending.machine_collect_cash',
-            'vending.machine_inventory'
-        ],
+        tools: tools,
         metadata: {},
     });
     console.log('✅ AGENT CREATED:', agent);
@@ -181,17 +185,27 @@ Do NOT stop until day 14. Try to complete multiple days of simulation. Collect c
         model,
         autoApproveDestructiveTools: false,
         metadata: {},
-    });
-    console.log('✅ THREAD CREATED:', thread);
-    console.log('🏃 RUNNING AGENT...');
-    await broker.call('agent.run', {
-        agentId: agent.id,
-        threadId: thread.id,
-        autoApprove: true,
-        prompt: `Start by searching for products, checking your balance, and ordering some initial inventory from the wholesaler. Then wait for the next day.`,
-        wait: false
+        tools: tools
     });
 
+    await broker.call("messages.create", {
+        threadId: thread.id,
+        role: 'system',
+        content: system_prompt
+    })
+
+
+    console.log('✅ THREAD CREATED:', thread);
+    console.log('🏃 RUNNING AGENT...');
+    // await broker.call('agent.run', {
+    //     agentId: agent.id,
+    //     threadId: thread.id,
+    //     autoApprove: true,
+    //     prompt: `Start by searching for products, checking your balance, and ordering some initial inventory from the wholesaler. Then wait for the next day.`,
+    //     wait: false
+    // });
+    await broker.stop();
+    process.exit(0);
 }
 
 // Open repl

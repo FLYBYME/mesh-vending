@@ -16,10 +16,7 @@ import {
     vendingSlotCrud,
     vendingProductMetadataCrud,
     vendingPendingOrderCrud,
-    vendingResetContract,
-    vendingSubAgentSpecsContract,
-    vendingRunSubAgentContract,
-    vendingChatWithSubAgentContract
+    vendingResetContract
 } from './vending.contract.js';
 
 import {
@@ -33,10 +30,7 @@ import {
     vending_machine_collect_cash,
     vending_machine_set_price,
     vending_machine_inventory,
-    vending_reset,
-    vending_sub_agent_specs,
-    vending_run_sub_agent,
-    vending_chat_with_sub_agent
+    vending_reset
 } from './vending.tools.js';
 
 export class VendingModule extends ServiceModule {
@@ -65,9 +59,6 @@ export class VendingModule extends ServiceModule {
         this.mountTool(vendingMachineInventoryContract, vending_machine_inventory);
 
         this.mountTool(vendingResetContract, vending_reset);
-        this.mountTool(vendingSubAgentSpecsContract, vending_sub_agent_specs);
-        this.mountTool(vendingRunSubAgentContract, vending_run_sub_agent);
-        this.mountTool(vendingChatWithSubAgentContract, vending_chat_with_sub_agent);
     }
 
     async onStart(broker: any): Promise<void> {
