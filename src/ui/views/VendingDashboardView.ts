@@ -1,9 +1,8 @@
 import {
     ViewProvider, Shell, Tabs, Stack, Heading, Text, Button,
-    Table, Theme, FormDialog, NotificationToast
+    Table, Theme, FormDialog, NotificationToast, BaseComponent, Row
 } from '@flybyme/mesh-ui';
 import { z } from '@flybyme/mesh';
-import { vendingMachineInventoryContract } from 'src/vending/vending.contract';
 
 export class VendingDashboardView implements ViewProvider {
     public readonly id = 'vending-ui';
@@ -23,12 +22,6 @@ export class VendingDashboardView implements ViewProvider {
     }
 
     public async resolveView(container: HTMLElement, disposables: { dispose: () => void }[]): Promise<void> {
-        const root = document.createElement('div');
-        Object.assign(root.style, {
-            display: 'flex', flexDirection: 'column', height: '100%',
-            backgroundColor: Theme.colors.bgPrimary, color: Theme.colors.textMain
-        });
-
         const tabs = new Tabs({
             items: [
                 { id: 'overview', label: 'Overview', icon: 'fas fa-chart-pie' },
@@ -51,18 +44,32 @@ export class VendingDashboardView implements ViewProvider {
                 tabs
             ]
         });
-
-        const headerEl = headerStack.getElement();
-        headerEl.style.padding = `${Theme.spacing.md} ${Theme.spacing.lg} 0 ${Theme.spacing.lg}`;
-        root.appendChild(headerEl);
-
-        this.contentContainer = document.createElement('div');
-        Object.assign(this.contentContainer.style, {
-            flexGrow: '1', overflowY: 'auto', padding: Theme.spacing.lg,
-            display: 'flex', flexDirection: 'column'
+        headerStack.applyStyles({
+            padding: `${Theme.spacing.md} ${Theme.spacing.lg} 0 ${Theme.spacing.lg}`
         });
-        root.appendChild(this.contentContainer);
-        container.appendChild(root);
+
+        const contentStack = new Stack({
+            direction: 'column',
+            fill: true,
+            scrollable: true,
+            padding: 'lg'
+        });
+        this.contentContainer = contentStack.getElement();
+
+        const root = new Stack({
+            direction: 'column',
+            fill: true,
+            children: [
+                headerStack,
+                contentStack
+            ]
+        });
+        root.applyStyles({
+            backgroundColor: Theme.colors.bgPrimary,
+            color: Theme.colors.textMain
+        });
+
+        container.appendChild(root.getElement());
 
         this.renderContent();
 
@@ -81,8 +88,11 @@ export class VendingDashboardView implements ViewProvider {
             console.warn('Failed to fetch balance', e);
         }
 
-        const container = document.createElement('div');
-        Object.assign(container.style, { display: 'flex', flexDirection: 'column', gap: Theme.spacing.md, height: '100%' });
+        const containerStack = new Stack({
+            direction: 'column',
+            gap: 'md',
+            fill: true
+        });
 
         // Status Bar
         if (this.balanceData) {
@@ -92,25 +102,29 @@ export class VendingDashboardView implements ViewProvider {
                     new Text({ text: `Day ${this.balanceData.day}`, variant: 'muted', weight: 'bold' }),
                     new Text({ text: `Balance: $${this.balanceData.balance.toFixed(2)}`, variant: 'main', weight: 'bold' })
                 ]
-            }).getElement();
-            statusBar.style.padding = Theme.spacing.sm;
-            statusBar.style.backgroundColor = 'rgba(0,0,0,0.1)';
-            statusBar.style.borderRadius = '4px';
-            container.appendChild(statusBar);
+            });
+            statusBar.applyStyles({
+                padding: Theme.spacing.sm,
+                backgroundColor: 'rgba(0,0,0,0.1)',
+                borderRadius: '4px'
+            });
+            containerStack.appendChildren(statusBar);
         }
 
-        const tabContent = document.createElement('div');
-        Object.assign(tabContent.style, { flexGrow: '1', display: 'flex', flexDirection: 'column' });
-        container.appendChild(tabContent);
+        const tabContent = new Stack({
+            direction: 'column',
+            fill: true
+        });
+        containerStack.appendChildren(tabContent);
 
         switch (this.activeTab) {
-            case 'overview': await this.renderOverviewTab(tabContent); break;
-            case 'storage': await this.renderStorageTab(tabContent); break;
-            case 'inbox': await this.renderInboxTab(tabContent); break;
+            case 'overview': await this.renderOverviewTab(tabContent.getElement()); break;
+            case 'storage': await this.renderStorageTab(tabContent.getElement()); break;
+            case 'inbox': await this.renderInboxTab(tabContent.getElement()); break;
         }
 
         this.contentContainer.innerHTML = '';
-        this.contentContainer.appendChild(container);
+        this.contentContainer.appendChild(containerStack.getElement());
     }
 
     // ─── Overview ───
@@ -143,10 +157,14 @@ export class VendingDashboardView implements ViewProvider {
                 height: 'calc(100vh - 250px)'
             });
 
-            const tableWrapper = document.createElement('div');
-            tableWrapper.style.marginTop = Theme.spacing.md;
-            tableWrapper.appendChild(table.getElement());
-            container.appendChild(tableWrapper);
+            const tableWrapper = new Stack({
+                direction: 'column',
+                children: [table]
+            });
+            tableWrapper.applyStyles({
+                marginTop: Theme.spacing.md
+            });
+            container.appendChild(tableWrapper.getElement());
         } catch (e) {
             container.appendChild(new Text({ text: 'Failed to load slots', variant: 'error' }).getElement());
         }
@@ -237,10 +255,14 @@ export class VendingDashboardView implements ViewProvider {
                 height: 'calc(100vh - 250px)'
             });
 
-            const tableWrapper = document.createElement('div');
-            tableWrapper.style.marginTop = Theme.spacing.md;
-            tableWrapper.appendChild(table.getElement());
-            container.appendChild(tableWrapper);
+            const tableWrapper = new Stack({
+                direction: 'column',
+                children: [table]
+            });
+            tableWrapper.applyStyles({
+                marginTop: Theme.spacing.md
+            });
+            container.appendChild(tableWrapper.getElement());
         } catch (e) {
             container.appendChild(new Text({ text: 'Failed to load storage inventory', variant: 'error' }).getElement());
         }
@@ -285,41 +307,52 @@ export class VendingDashboardView implements ViewProvider {
         try {
             const emails = await this.shell.app.call('vending.email_read', {});
 
-            const emailsContainer = document.createElement('div');
-            Object.assign(emailsContainer.style, {
-                display: 'flex', flexDirection: 'column', gap: Theme.spacing.sm,
-                marginTop: Theme.spacing.md, overflowY: 'auto', flexGrow: '1'
+            const emailsContainer = new Stack({
+                direction: 'column',
+                gap: 'sm',
+                fill: true,
+                scrollable: true
+            });
+            emailsContainer.applyStyles({
+                marginTop: Theme.spacing.md
             });
 
             if (emails.length === 0) {
-                emailsContainer.appendChild(new Text({ text: 'Inbox is empty', variant: 'muted' }).getElement());
+                emailsContainer.appendChildren(new Text({ text: 'Inbox is empty', variant: 'muted' }));
             } else {
                 emails.forEach((e: any) => {
-                    const emailCard = document.createElement('div');
-                    Object.assign(emailCard.style, {
-                        padding: Theme.spacing.md,
+                    const bodyText = new Text({
+                        text: e.body,
+                        monospace: true
+                    });
+                    bodyText.applyStyles({
+                        marginTop: Theme.spacing.sm,
+                        whiteSpace: 'pre-wrap',
+                        display: 'block',
+                        fontFamily: 'inherit',
+                        fontSize: '0.9em'
+                    });
+
+                    const emailCard = new Stack({
+                        direction: 'column',
+                        gap: 'xs',
+                        padding: 'md',
+                        children: [
+                            new Text({ text: `Day ${e.dayReceived} - From: ${e.from}`, weight: 'bold', variant: 'muted' }),
+                            new Heading({ level: 4, text: e.subject }),
+                            bodyText
+                        ]
+                    });
+                    emailCard.applyStyles({
                         backgroundColor: 'rgba(255,255,255,0.05)',
                         border: `1px solid ${Theme.colors.border}`,
                         borderRadius: '6px'
                     });
 
-                    emailCard.appendChild(new Text({ text: `Day ${e.dayReceived} - From: ${e.from}`, weight: 'bold', variant: 'muted' }).getElement());
-                    emailCard.appendChild(new Heading({ level: 4, text: e.subject }).getElement());
-
-                    const bodyText = document.createElement('pre');
-                    bodyText.textContent = e.body;
-                    Object.assign(bodyText.style, {
-                        marginTop: Theme.spacing.sm,
-                        whiteSpace: 'pre-wrap',
-                        fontFamily: 'inherit',
-                        fontSize: '0.9em'
-                    });
-                    emailCard.appendChild(bodyText);
-
-                    emailsContainer.appendChild(emailCard);
+                    emailsContainer.appendChildren(emailCard);
                 });
             }
-            container.appendChild(emailsContainer);
+            container.appendChild(emailsContainer.getElement());
         } catch (e) {
             container.appendChild(new Text({ text: 'Failed to load emails', variant: 'error' }).getElement());
         }
@@ -336,26 +369,39 @@ export class VendingDashboardView implements ViewProvider {
                     new NotificationToast({ message: 'Searching...', type: 'info' }).show();
                     const res = await this.shell.app.call('vending.search', { query: data.query });
 
-                    const dialogContainer = document.createElement('div');
-                    Object.assign(dialogContainer.style, {
-                        position: 'fixed', top: '10%', left: '50%', transform: 'translate(-50%, 0)',
-                        backgroundColor: Theme.colors.bgPrimary, border: `1px solid ${Theme.colors.border}`,
-                        padding: Theme.spacing.lg, zIndex: '1000', maxWidth: '800px', maxHeight: '80vh', overflowY: 'auto'
+                    const pre = new Text({
+                        text: res.results,
+                        monospace: true
+                    });
+                    pre.applyStyles({
+                        whiteSpace: 'pre-wrap',
+                        display: 'block',
+                        marginTop: Theme.spacing.md
                     });
 
-                    const title = new Heading({ level: 3, text: 'Search Results' });
-                    dialogContainer.appendChild(title.getElement());
+                    const dialogContainer = new Stack({
+                        direction: 'column',
+                        gap: 'md',
+                        scrollable: true
+                    });
+                    dialogContainer.applyStyles({
+                        position: 'fixed', top: '10%', left: '50%', transform: 'translate(-50%, 0)',
+                        backgroundColor: Theme.colors.bgPrimary, border: `1px solid ${Theme.colors.border}`,
+                        padding: Theme.spacing.lg, zIndex: '1000', maxWidth: '800px', maxHeight: '80vh'
+                    });
 
-                    const pre = document.createElement('pre');
-                    pre.textContent = res.results;
-                    pre.style.whiteSpace = 'pre-wrap';
-                    pre.style.marginTop = Theme.spacing.md;
-                    dialogContainer.appendChild(pre);
+                    const closeBtn = new Button({
+                        label: 'Close',
+                        onClick: () => document.body.removeChild(dialogContainer.getElement())
+                    });
 
-                    const closeBtn = new Button({ label: 'Close', onClick: () => document.body.removeChild(dialogContainer) });
-                    dialogContainer.appendChild(closeBtn.getElement());
+                    dialogContainer.appendChildren(
+                        new Heading({ level: 3, text: 'Search Results' }),
+                        pre,
+                        closeBtn
+                    );
 
-                    document.body.appendChild(dialogContainer);
+                    document.body.appendChild(dialogContainer.getElement());
 
                 } catch (e: any) {
                     new NotificationToast({ message: `Failed: ${e.message}`, type: 'error' }).show();

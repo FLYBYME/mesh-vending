@@ -13,7 +13,6 @@
     "types": [
       "node"
     ],
-    "baseUrl": "."
   },
   "include": [
     "src/**/*"
